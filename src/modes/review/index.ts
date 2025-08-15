@@ -2,7 +2,10 @@ import * as core from "@actions/core";
 import type { Mode, ModeOptions, ModeResult } from "../types";
 import { checkContainsTrigger } from "../../github/validation/trigger";
 import { prepareMcpConfig } from "../../mcp/install-mcp-server";
-import { fetchGitHubData } from "../../github/data/fetcher";
+import {
+  fetchGitHubData,
+  extractTriggerTimestamp,
+} from "../../github/data/fetcher";
 import type { FetchDataResult } from "../../github/data/fetcher";
 import { createPrompt } from "../../create-prompt";
 import type { PreparedContext } from "../../create-prompt";
@@ -251,12 +254,15 @@ This ensures users get value from the review even before checking individual inl
     }
 
     // Review mode doesn't create a tracking comment
+    const triggerTime = extractTriggerTimestamp(context);
+
     const githubData = await fetchGitHubData({
       octokits: octokit,
       repository: `${context.repository.owner}/${context.repository.repo}`,
       prNumber: context.entityNumber.toString(),
       isPR: context.isPR,
       triggerUsername: context.actor,
+      triggerTime,
     });
 
     // Review mode doesn't need branch setup or git auth since it only creates comments
